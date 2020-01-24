@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="dadd">
+    <file>11928-200.png</file>
+    <file>StarDeepClasses.py</file>
+    <file>volcano_eruption-512.png</file>
+  </qresource>
+</RCC>

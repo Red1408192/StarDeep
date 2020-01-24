@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StarDeep</class>
+ <widget class="QMainWindow" name="StarDeep">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>642</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>791</width>
+      <height>601</height>
+     </rect>
+    </property>
+    <widget class="QTabWidget" name="simulationSelection">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>801</width>
+       <height>601</height>
+      </rect>
+     </property>
+     <property name="tabPosition">
+      <enum>QTabWidget::West</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="simpleModel_2">
+      <attribute name="title">
+       <string>Simple Model</string>
+      </attribute>
+      <widget class="QWidget" name="horizontalLayoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>781</width>
+         <height>601</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_20">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMinAndMaxSize</enum>
+        </property>
+        <property name="leftMargin">
+         <number>10</number>
+        </property>
+        <property name="topMargin">
+         <number>10</number>
+        </property>
+        <property name="rightMargin">
+         <number>10</number>
+        </property>
+        <property name="bottomMargin">
+         <number>10</number>
+        </property>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QGroupBox" name="groupBox_4">
+            <property name="title">
+             <string>Settings</string>
+            </property>
+            <widget class="QWidget" name="verticalLayoutWidget_4">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>231</width>
+               <height>511</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_21">
+                <item>
+                 <widget class="QLabel" name="label_19">
+                  <property name="text">
+                   <string>IMF:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_3">
+                  <item>
+                   <property name="text">
+                    <string>Salpeter</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Scalo</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Kroupa</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="Line" name="line_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_22">
+                <item>
+                 <widget class="QLabel" name="label_20">
+                  <property name="text">
+                   <string>SML:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_4">
+                  <item>
+                   <property name="text">
+                    <string>Default</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="Line" name="line_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_23">
+                <item>
+                 <widget class="QLabel" name="label_21">
+                  <property name="text">
+                   <string>Supernovae</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_17">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_24">
+                <item>
+                 <widget class="QLabel" name="label_22">
+                  <property name="text">
+                   <string>Option1</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_18">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_25">
+                <item>
+                 <widget class="QLabel" name="label_23">
+                  <property name="text">
+                   <string>Option2</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_19">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_26">
+                <item>
+                 <widget class="QLabel" name="label_24">
+                  <property name="text">
+                   <string>Option3</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_20">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_27">
+                <item>
+                 <widget class="QLabel" name="label_25">
+                  <property name="text">
+                   <string>Option4</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_21">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_28">
+                <item>
+                 <widget class="QLabel" name="label_26">
+                  <property name="text">
+                   <string>Option5</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_22">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_29">
+                <item>
+                 <widget class="QLabel" name="label_27">
+                  <property name="text">
+                   <string>Option6</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_23">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_30">
+                <item>
+                 <widget class="QLabel" name="label_28">
+                  <property name="text">
+                   <string>Option7</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_24">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="Line" name="line_6">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_31">
+                <item>
+                 <widget class="QLabel" name="label_29">
+                  <property name="text">
+                   <string>Option8</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_25">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_32">
+                <item>
+                 <widget class="QLabel" name="label_30">
+                  <property name="text">
+                   <string>Option9</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_26">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_33">
+                <item>
+                 <widget class="QLabel" name="label_31">
+                  <property name="text">
+                   <string>Option10</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_27">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_34">
+                <item>
+                 <widget class="QLabel" name="label_32">
+                  <property name="text">
+                   <string>Option11</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_28">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_35">
+                <item>
+                 <widget class="QLabel" name="label_33">
+                  <property name="text">
+                   <string>Option12</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_29">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_36">
+                <item>
+                 <widget class="QLabel" name="label_34">
+                  <property name="text">
+                   <string>Option13</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_30">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_37">
+                <item>
+                 <widget class="QLabel" name="label_35">
+                  <property name="text">
+                   <string>Option14</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_31">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_38">
+                <item>
+                 <widget class="QLabel" name="label_36">
+                  <property name="text">
+                   <string>Option15</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_32">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="Start_2">
+            <property name="text">
+             <string>Run</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_5">
+          <property name="title">
+           <string>Results</string>
+          </property>
+          <widget class="QWidget" name="verticalLayoutWidget_5">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>20</y>
+             <width>241</width>
+             <height>551</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QTextBrowser" name="textBrowser_2">
+              <property name="cursor" stdset="0">
+               <cursorShape>IBeamCursor</cursorShape>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_6">
+          <property name="title">
+           <string>Plots</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="sSimpleModel_2">
+      <attribute name="title">
+       <string>Stochastic Simple Model</string>
+      </attribute>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionLoad_Settings"/>
+    <addaction name="actionSave_Settings"/>
+    <addaction name="actionStarDeep_Settings"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuData">
+    <property name="title">
+     <string>Data</string>
+    </property>
+    <addaction name="actionOpen_Text_Data"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuSettings"/>
+   <addaction name="menuData"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionLoad_Settings">
+   <property name="text">
+    <string>Load Settings</string>
+   </property>
+  </action>
+  <action name="actionSave_Settings">
+   <property name="text">
+    <string>Save Settings</string>
+   </property>
+  </action>
+  <action name="actionStarDeep_Settings">
+   <property name="text">
+    <string>StarDeep Settings</string>
+   </property>
+  </action>
+  <action name="actionOpen_Text_Data">
+   <property name="text">
+    <string>Open Text Data</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
