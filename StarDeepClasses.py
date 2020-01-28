@@ -494,6 +494,15 @@ class Composition():
         for k, v in other.elements.items():
             self.aMS(k, -v)
         return Composition(self.elements)
+    
+    def __eq__(self, other):
+        try:
+            if self.elements.values == other.elements.values:
+                return True
+            return False
+        except:
+            return False
+        
         
     def __str__(self):
         return "".join(str(k) + ": " + str(v) + "\n" for k, v in self.elements.items() if v != 0)
@@ -501,311 +510,207 @@ class Composition():
 
 class Stars():
     """
-    Abstract Class Stars, will be used in all other star classes,
-    create a list where similar star will be stored, when a star has the same lifespam
-    and the same mass, instead of add another element, increase the number.
-    ade, a list where the stargroup go to die.
+    Abstract Class Stars, will be used in all other star classes
+    mass, a float defining the mass of the stars contained
+    number, an int defining the number of similar star
+    composition, a compositionClass defining the elements contained in the class
+    sisters, a list of other star if it is a binary or more system
+    lifespanDef, a string defining the equation for the calculate the star lifespan
+        chose from "Default", "simple", "SimpleClassic"
     """
-    def __init__(self, initial=None):
-              
-        if initial == None:
-            self.SG=[]
+    def __init__(self, mass, number, composition, sisters = None, lifespanDef="Default"):
+        if sisters == None or len(sisters) == 0:
+            self.sisters = []
         else:
-            self.SG = initial
-            
-        self.defLife = 10
+            self.sisters = sisters
+        self.mass = mass
+        self.number = number
+        self.composition = composition
+        self.lifespanDef = lifespanDef
+        self.lifespan = self.iniLS()
         pass
     
-    def fSis(self, mass, lifespan=None):
+    def iniLS(self):
         """
-        Find Sister, return a int defining the index where a similar stargroup is in self.Stars
+        get the stellar lifespam (stellar time), based on the mass
         """
-        lifespan = self.defLife if lifespan == None else lifespan
-        for s in self.SG:
-            if s[0] == mass and s[2] == lifespan:
-                return self.SG.index(s)
-        raise KeyError
-        
-    def addStars(self, Comp, mass, number, lifespan=None):
+        m = self.mass
+        if self.lifespanDef == "Default":
+            if m <= 10:
+                a = 1.2*(10**10)*(m**-2.78)
+                return int(a // yearPERTICK)
+            else:
+                a = 1.1*(10**8)*(m**-0.75)
+                return int(a // yearPERTICK)
+        elif self.lifespanDef == "Simple":
+            a = 11.7*((10^9)/(m^2))
+            return int(a // yearPERTICK)
+        elif self.lifespanDef == "SimpleClassic":
+            return 1
+
+    def update(self):
         """
-        addStars: it will try to find a sister with the same int mass, the same
-        int lifespam,and if there is one, it will increase the number in that group
-        Otherwise, create a new group.
-        
-        By default, addStars should receive mass from the update call by an equal ammount of mass removed from the
-        system
+        Update the star lifespan
+        return None if the star or her's sisters didn't die
+        return a tuple of (yield, renmant) if the star died
+        return a tuple of (yield, None) if just a sister died
         """
-        lifespan = self.defLife if lifespan == None else lifespan
-        # try:
-        #     self.SG[self.fSis(mass, lifespan)][1] += number
-        #     self.SG[self.fSis(mass, lifespan)][3] += Comp
-        # except KeyError:
-        #     self.SG.append([mass, number, lifespan, Comp])
-        # pass
-        self.SG.append([mass, number, lifespan, Comp])
-    
-    def getTotComp(self):
-        """
-        Return the total composition of the the same star class
-        """
+        empty = Composition()
         res = Composition()
-        for s in self.SG:
-            res += s[3]
+        res2 = Composition()
+        for s in self.sisters:
+            yie = s.update()
+            if yie != None:
+                res += yie[0]
+                if yie[1] != None:
+                    self.sisters[self.sisters.index(s)] = yie[1]
+        self.lifespan -= 1
+        if self.lifespan <= 0:
+            res2, ren = self.endStars()
+            if res != empty:
+                res2 += res
+                return res2, ren
+            return res2, ren
+        if res != empty:
+            return res, None
+        return None, None
+    
+    def getNum(self):
+        """
+        return the number of star in the class
+        """
+        return self.number
+    
+    def getComp(self):
+        """
+        return the star composition
+        """
         return self.composition
     
+    def getLife(self):
+        """
+        return the star lifespan
+        """
+        return self.lifespan
+    
+    def getSisters(self):
+        """
+        return the list of the sisters stars
+        """
+        return self.sisters
+    
     def getMass(self):
         """
-        Get the total mass of the star class, in solar masses
+        return the star mass
         """
-        mass = 0
-        for s in self.SG:
-            mass += s[0]*s[1]
-        return mass
-    
-    def getPop(self):
+        return self.mass
+    def endStars(self):
         """
-        Return the total number of star of the same star class
+        Stars is an abstract class, use a child
+        class for have any effect
         """
-        number = 0
-        for s in self.SG:
-            number += s[1]
-        return number
-    
-    def getAverageLS(self):
-        """
-        Get the average lifespan of all star in the same star class
-        """
-        lS = 0
-        for s in self.SG:
-            lS += [2]*[1]
-        return lS/self.getPop()
-
-    def endStars(self, starGroup):
-        # self.ade.append(self.SG.pop(self.SG.index(starGroup)))
         pass
-
-    def update(self):
-        """
-        Update every star group in the class, reducing by a Time Tick the life of each of them,
-        return a tuple of the product of the died star as a composition and the mass of the renmant
-        """
-        rn = []
-        upP = Composition()
-        if len(self.SG) == 0:
-            return upP, rn
-        for s in self.SG.copy():
-            s[2] -= TIMETICK
-            if s[2] <= 0:
-                p, r = self.endStars(s)
-                rn.append(r)
-                upP += p
-        return upP, rn
     
-    def __str__(self):
-        # res = []
-        # for s in self.SG:
-        #         res.append("Mass: " + str(s[0]) + ", Pop: " + str(s[1]) + ", Life: " + str(s[2]) + "\n")
-        # a = "".join(res)
-        res = {}
-        for s in self.SG:
-            if s[0] not in res:
-                res.update({s[0]:s[1]})
-                continue
-            res[s[0]] += s[1]
-        nRes = [str(k) + "M = " + str(v) + "\n" for k,v in res.items()]
-        nRes = "".join(nRes)
-        return nRes
+class LowStars(Stars):
+    """
+    Stars of mass between 0.08 and 8 solar masses,
+    leave behid a whitedwarf as renmant
+    """
     
-    def printStars(self):
-        res = {}
-        for s in self.SG:
-            if s[0] not in res:
-                res.update({s[0]:s[1]})
-                continue
-            res[s[0]] += s[1]
-        nRes = str("M= " + k + " pop= " + v + "\n" for k,v in res)
-        return nRes
-
-class NormalStars(Stars):
-    """
-    Star under the 8 solar masses threshold
-    """
-    def __init__(self):
-        super().__init__()
-        self.defLife = None
-        pass
-
-    def endStars(self, starGroup):
-        sYield = getStarYield(starGroup[3].mMF(), starGroup[0])
+    def endStars(self):
+        """
+        Return a tuple of the product of the star yield and the renmant
+        star
+        """
+        sYield = getStarYield(self.composition.mMF(), self.getMass())
         renmant = sYield.pop("rem")
-        starGroup[3].gEx(renmant*cUnit*starGroup[1])
+        self.composition.gEx(renmant*cUnit)
         for k, v in sYield.items():
             if v < 0:
                 try:
-                    starGroup[3].ex(k, -v)
+                    self.composition.ex(k, -v)
                     continue
                 except ArithmeticError:
-                    starGroup[3].sMS(k, 0)
+                    self.composition.sMS(k, 0)
                     continue
-            starGroup[3].con("h", k, v*cUnit*starGroup[1])
-        product = starGroup.pop(3)#starGroup[3].gEx(starGroup[1]*starGroup[0])
-        # self.ade.append(self.SG.pop(self.SG.index(starGroup)))
-        self.SG.pop(self.SG.index(starGroup))
-        return product, (renmant, starGroup[1])
-
-
-class HugeStars(Stars):
-    """
-    Star over the 8 solar masses threshold
-    """
-    def __init__(self):
-        super().__init__()
-        self.defLife = 1
-        pass
+            self.composition.con("h", k, v*cUnit*self.getNum())
+        product = self.composition
+        self.composition = Composition()
+        renmantComp = Composition()
+        return product, WDStars(renmant, self.getNum(), renmantComp.aMS("wm", renmant*cUnit), self.sisters, self.lifespanDef)
     
-    def endStars(self, starGroup):
-        """generate the supernovae"""
-        sYield = getStarYield(starGroup[3].mMF(), starGroup[0])
+class HighStars(Stars):
+    """
+    Stars of mass over the 8 solar masses,
+    leave behid a whitedwarf as renmant
+    """    
+    def endStars(self):
+        """
+        Return a tuple of the product of the star yield and the renmant
+        star
+        """
+        sYield = getStarYield(self.composition.mMF(), self.getMass())
         renmant = sYield.pop("rem")
-        starGroup[3].gEx(renmant*cUnit)
+        self.composition.gEx(renmant*cUnit)
         for k, v in sYield.items():
             if v < 0:
                 try:
-                    starGroup[3].ex(k, -v)
+                    self.composition.ex(k, -v)
                     continue
                 except ArithmeticError:
-                    starGroup[3].sMS(k, 0)
+                    self.composition.sMS(k, 0)
                     continue
-            starGroup[3].con("h", k, v*cUnit*starGroup[1])
-        product = starGroup.pop(3)#starGroup[3].gEx(starGroup[1]*starGroup[0])
-        # self.ade.append(self.SG.pop(self.SG.index(starGroup)))
-        self.SG.pop(self.SG.index(starGroup))
-        return product, (renmant, starGroup[1])
-
-
-class NeutronStars(Stars):
-    def __init__(self):
-        super().__init__()
-        self.defLife = None
-        pass
-    def spinVeryFast(self):
-        pass
-    def update(self):
-        """
-        Update every star group in the class, reducing by a Time Tick the life of each of them,
-        return the product of the died star as a composition
-        """
-        rn = []
-        upP = Composition()
-        return upP, rn
-
-class WhiteDwarf(Stars):
-    def __init__(self):
-        super().__init__()
-        self.defLife = None
-        pass
-    def update(self):
-        """
-        Update every star group in the class, reducing by a Time Tick the life of each of them,
-        return the product of the died star as a composition
-        """
-        rn = []
-        upP = Composition()
-        return upP, rn
-
-class BinarySystemSC():
-    """
-    Class for bynary system that are Snee 1a candidate
-    Initial: a list of Star Groups to initialize the class with 
-    """
-    def __init__(self, initial=None):
-        if initial == None:
-            self.SG=[]
-        else:
-            self.SG = initial
-            
-        self.defLife = 10
-        pass
+            self.composition.con("h", k, v*cUnit*self.getNum())
+        product = self.composition
+        self.composition = Composition()
+        renmantComp = Composition()
+        if renmant > 2.4:
+            return product, BHoles(renmant, self.getNum(), renmantComp.aMS("bm", renmant*cUnit), self.sisters, self.lifespanDef)
+        return product, NeutronStars(renmant, self.getNum(), renmantComp.aMS("bm", renmant*cUnit), self.sisters, self.lifespanDef)
     
-    def fSis(self, mass1, mass2, lifespan=None):
-        """
-        Find Sister, return a int defining the index where a similar stargroup is in self.Stars
-        """
-        lifespan = self.defLife if lifespan == None else lifespan
-        for s in self.SG:
-            if s[0] == mass1 and s[1] == mass2 and s[3] == lifespan:
-                return self.SG.index(s)
-        raise KeyError
-        
-    def addStars(self, Comp1, Comp2, mass1, mass2, number, lifespan1=None, lifespan2=None):
-        """
-        addStars: it will try to find a sister with the same int mass, the same
-        int lifespam,and if there is one, it will increase the number in that group
-        Otherwise, create a new group.
-        
-        By default, addStars should receive mass from the update call by an equal ammount of mass removed from the
-        system
-        """
-        lifespan1, lifespan2 = (self.defLife, self.defLife) if lifespan1 == None or lifespan2 == None else lifespan1, lifespan2
-        # try:
-        #     self.SG[self.fSis(mass, lifespan)][1] += number
-        #     self.SG[self.fSis(mass, lifespan)][3] += Comp
-        # except KeyError:
-        #     self.SG.append([mass, number, lifespan, Comp])
-        # pass
-        self.SG.append([mass1, mass2, number, lifespan1, lifespan2, Comp1, Comp2])
-        pass
+class Renmants(Stars):
+    """
+    Abstract class for inerte renmant Stars
+    in the update def there will
+    be no reducing lifespan
+    """
 
-    def getTotComp(self):
+    def update(self):
         """
-        Return the total composition of the the same star class
+        return None if the star or her's sisters didn't die
+        return a tuple of (yield, None) if just a sister died
         """
+        empty = Composition()
         res = Composition()
-        for s in self.SG:
-            res += s[5]
-            res += s[6]
-        return res
+        for s in self.sisters:
+            yie = s.update()
+            if yie != None:
+                res += yie[0]
+                if yie[1] != None:
+                    self.sisters[self.sisters.index(s)] = yie[1]
+        if res != empty:
+            return res, None
+        return None, None
     
-    def getMass(self):
-        """
-        Get the total mass of the star class, in solar masses
-        """
-        mass = 0
-        for s in self.SG:
-            mass += (s[0]+s[1])*s[2]
-        return mass
-    
-    def getPop(self):
-        """
-        Return the total number of star of the same star class
-        """
-        number = 0
-        for s in self.SG:
-            number += s[2]
-        return number
+class WDStars(Renmants):
+    """
+    White Dwarf Stars
+    """
 
-    def endStars(self, starGroup):
-        # self.ade.append(self.SG.pop(self.SG.index(starGroup)))
+class NeutronStars(Renmants):
+    """
+    Neutron Stars
+    """    
+    def SpinVeryFast(self):
+        """
+        It will spin Very Fast
+        """
         pass
 
-    def update(self):
-        """
-        Update every star group in the class, reducing by a Time Tick the life of each of them,
-        return a tuple of the product of the died star as a composition and the mass of the renmant
-        """
-        rn = []
-        upP = Composition()
-        if len(self.SG) == 0:
-            return upP, rn
-        for s in self.SG.copy():
-            s[2] -= TIMETICK
-#            if s[2] <= 0:
-#                p, r = self.endStars(s)
-#                rn.append(r)
-#                upP += p
-        return upP, rn
-
-
+class BHoles(Renmants):
+    """
+    Black Holes
+    """
 
 class SimpleModelUnit(object):
     """
@@ -840,7 +745,7 @@ class SimpleModelUnit(object):
         if edges != None:
             self.edges = edges
         
-        self.stars = [NormalStars(), HugeStars(), BinarySystemSC(), NeutronStars(), WhiteDwarf()]
+        self.stars = []
         if stars != None:
             self.stars = stars
         self.totalMassStarBorn = 0
@@ -906,6 +811,42 @@ class SimpleModelUnit(object):
         """
         return self.totalMassStarBorn
     
+    def printStars(self, full=False):
+        """
+        Print the current star population
+        """
+        res, wD, nS, bH = {}, 0, 0, 0
+        if full == True:
+            for s in self.stars:
+                if s.__class__.__name__ == "LowStars" or s.__class__.__name__ == "HighStars":
+                    res.update({s.getMass():s.getNum()})
+                if s.__class__.__name__ == "WDStars":
+                    wD += s.getNum()
+                if s.__class__.__name__ == "NeutronStars":
+                    nS += s.getNum()
+                if s.__class__.__name__ == "BHoles":
+                    bH += s.getNum()
+                for sis in s.getSisters():
+                    if s.__class__.__name__ == "LowStars" or s.__class__.__name__ == "HighStars":
+                        res.update({s.getMass():s.getNum()})
+                    if s.__class__.__name__ == "WDStars":
+                        wD += s.getNum()
+                    if s.__class__.__name__ == "NeutronStars":
+                        nS += s.getNum()
+                    if s.__class__.__name__ == "BHoles":
+                        bH += s.getNum()
+            for k, v in res.items():
+                print(str(k) + "M: " + str(v))
+            print("WhiteDwarfs: " + str(wD))
+            print("NeutronStars: " + str(nS))
+            print("BlackHoles: " + str(bH))
+        else:
+            for s in self.stars:
+                if s.__class__.__name__ == "LowStars" or s.__class__.__name__ == "HighStars":
+                    res.update({s.getMass():s.getNum()})
+            for k, v in res.items():
+                print(str(k) + "M: " + str(v))            
+    
     def IMFdef(self, SM):
         """
         return the Initial Mass Function for each solar mass range,
@@ -964,56 +905,43 @@ class SimpleModelUnit(object):
         for p, b in zip(pr, self.bS):
            self.bS[self.bS.index(b)] += (p/a)*self.gsm
         return self.bS
-    
-    def getST(self, m):
-        """
-        get the stellar lifespam (stellar time), based on the mass
-        """
-        # if m <= 6.6:
-        #     a = (10**((1.338-(1.790-(0.2232*(7.764-np.log10(m))))**
-        # (1/2))/0.116)-9)*(1000000000/yearPERTICK)
-        #     return int(a // yearPERTICK)
-        if self.sT == "Default":
-            if m <= 10:
-                a = 1.2*(10**10)*(m**-2.78)
-                return int(a // yearPERTICK)
-            else:
-                a = 1.1*(10**8)*(m**-0.75)
-                return int(a // yearPERTICK)
-        elif self.sT == "Simple":
-            a = 11.7*((10^9)/(m^2))
-            return int(a // yearPERTICK)
-        elif self.sT == "SimpleClassic":
-            return 1
         
-    def stellarGen(self, s, m, index):
-        c = int(s//m[1])
-        si = self.bS.index(s)
-        self.bS[si] = s%m[1]
-        self.bBS[si] = int(c*self.bP)
-        c = c - int(c*self.bP)
-        try:
-            a = self.composition.gEx(round(c*m[1]*cUnit, cDP))
-        except AssertionError:
-            c *= self.composition.totalMass()/(c*m[1]*cUnit)
-            c = int(c//1)
-            a = self.composition.gEx(round(c*m[1]*cUnit, cDP))
-        self.stars[index].addStars(a, m[1], c, self.getST(m[1]))
-        self.totalMassStarBorn += (m[1]*c)//m[1]
+    def stellarGen(self):
+        """
+        Generate the single Stars. Should always be called before the binary generation
+        """
+        for s, m in zip(self.getIM(), self.getSML(self.SMLmethod)):
+            if s/m[1] >= 1:
+                c = int(s//m[1])
+                si = self.bS.index(s)
+                self.bS[si] = s%m[1]
+                self.bBS[si] = int(c*self.bP)
+                c = c - int(c*self.bP)
+                try:
+                    a = self.composition.gEx(round(c*m[1]*cUnit, cDP))
+                except AssertionError:
+                    c *= self.composition.totalMass()/(c*m[1]*cUnit)
+                    c = int(c//1)
+                    a = self.composition.gEx(round(c*m[1]*cUnit, cDP))
+                if m[1] < 8:
+                    self.stars.append(LowStars(m[1], c, a))
+                else:
+                    self.stars.append(HighStars(m[1], c, a))
+                self.totalMassStarBorn += m[1]*c
         self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSMDG(), 3)
         pass
 
     def bStellarGen(self, bBS, SML):
+        """
+        Generate the binary stars
+        """
         c = 0
         while sum(bBS) > 1:
             a = choice(range(len(bBS)))
-            if len(bBS) == 1:
-                a = choice(range(len(bBS)))
-                pass
             if bBS[-1] > 0:
                 x = SML[-1][1]
                 y = SML[a][1]
-                c = 1 + int(bBS[-1]*random()) if 1 + int(bBS[-1]*random()) < bBS[-1] else bBS[-1]
+                c = int(bBS[-1]*random()) if int(bBS[-1]*random()) > 1 else 1
                 if bBS[a] < c and bBS[a] != bBS[-1]:
                     c = bBS[a]
                 elif bBS[a] == bBS[-1]:
@@ -1022,7 +950,21 @@ class SimpleModelUnit(object):
                 bBS[-1] -= c
                 xComp = self.composition.gEx(round(c*x*cUnit, cDP))
                 yComp = self.composition.gEx(round(c*y*cUnit, cDP))
-                self.stars[2].addStars(xComp, yComp, x, y, c, self.getST(x), self.getST(y))
+                
+                #Generate the minor stars
+                if y < 8:
+                    m = LowStars(y, c, yComp)
+                else:
+                    m = HighStars(y, c, yComp)
+                
+                #Generate the Major Stars
+                if x < 8:
+                    M = LowStars(x, c, xComp, sisters=[m])
+                else:
+                    M = HighStars(x, c, xComp, sisters=[m])
+                    
+                #Store the result in the stars list
+                self.stars.append(M)
             else:
                 self.bStellarGen(bBS[:-1], SML[:-1])
                 break
@@ -1040,21 +982,14 @@ class SimpleModelUnit(object):
         
         for s in self.stars:
             a, r = s.update()
-            self.composition += a
+            if a != None:
+                self.composition += a
+            if r != None:
+                self.stars[self.stars.index(s)] = r
             self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSMDG(), 3)
-            if s.__class__.__name__ == "NormalStars":
-                for rn in r:
-                    c = Composition()
-                    self.stars[4].addStars(c.aMS("h", rn[0]*rn[1]*cUnit), rn[0], rn[1])
-            if s.__class__.__name__ == "HugeStars":
-                for rn in r:
-                    c = Composition()
-                    self.stars[3].addStars(c.aMS("h", rn[0]*rn[1]*cUnit), rn[0], rn[1])
-        for s, m in zip(self.getIM(), self.getSML(self.SMLmethod)):
-            if m[1] <= 8 and s/m[1] >= 1:
-                self.stellarGen(s,m,0)
-            elif s >= 1:
-                self.stellarGen(s,m,1)
+            
+        #Generate the Stars
+        self.stellarGen()
         self.bStellarGen(self.bBS, self.getSML(self.SMLmethod))
         pass
     
@@ -1067,10 +1002,7 @@ class SimpleModelUnit(object):
             #           + str(self.gsm) + " " + str(self.composition.mMF()))
             #     print()
             if t % 100 == 0:
-                print("pop at " + str(t) + "M years:")
-                print(self.stars[0])
-                print(self.stars[1])
-                print("Total Pop = " + str(self.stars[0].getPop() + self.stars[0].getPop()) + "\n")
+                self.printStars()
         pass
 
 a = Composition()
