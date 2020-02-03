@@ -6,6 +6,7 @@ Created on Tue Dec 24 20:50:16 2019
 @author: Red (Marco Rosso)
 """
 import scipy.integrate as integrate
+from time import time
 from StarDeepDataImporter import elIso
 from StarDeepDataImporter import getStarYield
 from random import random
@@ -518,7 +519,7 @@ class Stars():
     lifespanDef, a string defining the equation for the calculate the star lifespan
         chose from "Default", "simple", "SimpleClassic"
     """
-    def __init__(self, mass, number, composition, sisters = None, lifespanDef="Default"):
+    def __init__(self, mass, number, composition, Position, sisters = None, lifespanDef="Default"):
         if sisters == None or len(sisters) == 0:
             self.sisters = []
         else:
@@ -528,6 +529,8 @@ class Stars():
         self.composition = composition
         self.lifespanDef = lifespanDef
         self.lifespan = self.iniLS()
+        self.pos = Position
+        self.ID = self.genID()
         pass
     
     def iniLS(self):
@@ -547,7 +550,49 @@ class Stars():
             return int(a // yearPERTICK)
         elif self.lifespanDef == "SimpleClassic":
             return 1
-
+    
+    def genID(self):
+        if self.__class__.__name__ == "LowStars":
+            o = "1"
+        elif self.__class__.__name__ == "HighStars":
+            o = "2"
+        elif self.__class__.__name__ == "WDStars":
+            o = "3"
+        elif self.__class__.__name__ == "NeutronStars":
+            o = "4"
+        else:
+            o = "5"
+        try:
+            if self.sisters[0].__class__.__name__ == "LowStars":
+                t = "1"
+            elif self.sisters[0].__class__.__name__ == "HighStars":
+                t = "2"
+            elif self.sisters[0].__class__.__name__ == "WDStars":
+                t = "3"
+            elif self.sisters[0].__class__.__name__ == "NeutronStars":
+                t = "4"
+            else:
+                t = "5"
+        except:
+            t = "0"
+        
+        try:
+            if self.sisters[1].__class__.__name__ == "LowStars":
+                tr = "1"
+            elif self.sisters[1].__class__.__name__ == "HighStars":
+                tr = "2"
+            elif self.sisters[1].__class__.__name__ == "WDStars":
+                tr = "3"
+            elif self.sisters[1].__class__.__name__ == "NeutronStars":
+                tr = "4"
+            else:
+                tr = "5"
+        except:
+            tr = "0"
+        
+        pos = '{:06d}'.format(self.pos)
+        return "".join(o + t + tr + pos)
+    
     def update(self):
         """
         Update the star lifespan
@@ -580,6 +625,19 @@ class Stars():
         return the number of star in the class
         """
         return self.number
+
+    def getPos(self):
+        """
+        Return the index position in the star group array
+        """
+        return int(self.ID[3:])
+    
+    def setPos(self, pos):
+        self.pos = pos
+        self.ID = self.genID()
+        
+    def getID(self):
+        return self.ID
     
     def getComp(self):
         """
@@ -637,12 +695,18 @@ class LowStars(Stars):
         product = self.composition
         self.composition = Composition()
         renmantComp = Composition()
-        return product, WDStars(renmant, self.getNum(), renmantComp.aMS("wm", renmant*self.getNum()*cUnit), self.sisters, self.lifespanDef)
+        #it should never spawn a bHoles or a neutron star, but i leave this here for safety
+        if renmant > 2.4:
+            return product, BHoles(renmant, self.getNum(), renmantComp.aMS("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        elif renmant > 1.44:
+            return product, NeutronStars(renmant, self.getNum(), renmantComp.aMS("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        return product, WDStars(renmant, self.getNum(), renmantComp.aMS("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
     
 class HighStars(Stars):
     """
     Stars of mass over the 8 solar masses,
-    leave behid a whitedwarf as renmant
+    leave behid a neutron stars and black hole as renmant,
+    the mainb difference is that they cause supernoave event
     """    
     def endStars(self):
         """
@@ -665,8 +729,10 @@ class HighStars(Stars):
         self.composition = Composition()
         renmantComp = Composition()
         if renmant > 2.4:
-            return product, BHoles(renmant, self.getNum(), renmantComp.aMS("bm", renmant*self.getNum()*cUnit), self.sisters, self.lifespanDef)
-        return product, NeutronStars(renmant, self.getNum(), renmantComp.aMS("gm", renmant*self.getNum()*cUnit), self.sisters, self.lifespanDef)
+            return product, BHoles(renmant, self.getNum(), renmantComp.aMS("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        elif renmant > 1.44:
+            return product, NeutronStars(renmant, self.getNum(), renmantComp.aMS("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        return product, WDStars(renmant, self.getNum(), renmantComp.aMS("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
     
 class Renmants(Stars):
     """
@@ -821,17 +887,17 @@ class SimpleModelUnit(object):
         by the kind of renmant if dead
         """
         def insertCount(s):
-            if s.__class__.__name__ == "WDStars":
+            if s.getID()[0] == "3":
                 try:
                     res["WhiteDwarfs"] += s.getNum()
                 except:
                     res.update({"WhiteDwarfs":s.getNum()})
-            elif s.__class__.__name__ == "NeutronStars":
+            elif s.getID()[0] == "4":
                 try:
                     res["NeutronStars"] += s.getNum()
                 except:
                     res.update({"NeutronStars":s.getNum()})
-            elif s.__class__.__name__ == "BHoles":
+            elif s.getID()[0] == "5":
                 try:
                     res["BlackHoles"] += s.getNum()
                 except:
@@ -862,21 +928,21 @@ class SimpleModelUnit(object):
         if full == True:
             for k, v in res.items():
                 if type(k) != str:
-                    print(str(k) + "M: " + str(v))
+                    print(str(k) + "M: " + '{:,}'.format(v))
                 elif k == "WhiteDwarfs":
-                    print("WhiteDwarfs: " + str(v))
+                    print("WhiteDwarfs: " + '{:,}'.format(v))
                 elif k == "NeutronStars":
-                    print("NeutronStars: " + str(v))
+                    print("NeutronStars: " + '{:,}'.format(v))
                 elif k == "BlackHoles":
-                    print("BlackHoles: " + str(v))
+                    print("BlackHoles: " + '{:,}'.format(v))
                 elif k == "tC":
-                    print("TotalCount: " + str(v))
+                    print("TotalCount: " + '{:,}'.format(v))
         else:
             for k, v in res.items():
                 if type(k) != str:
-                    print(str(k) + "M: " + str(v))
+                    print(str(k) + "M: " + '{:,}'.format(v))
                 elif k == "tC":
-                    print("TotalCount: " + str(v))
+                    print("TotalCount: " + '{:,}'.format(v))
     
     def IMFdef(self, SM):
         """
@@ -956,14 +1022,16 @@ class SimpleModelUnit(object):
                     a = self.composition.gEx(round(c*m[1]*cUnit, cDP))
                 if m[1] < 8:
                     try:
-                        self.stars[m[1]].append(LowStars(m[1], c, a, lifespanDef=self.sT))
+                        p = len(self.stars[m[1]])-1
+                        self.stars[m[1]].append(LowStars(m[1], c, a, p, lifespanDef=self.sT))
                     except:
-                        self.stars.update({m[1]:[LowStars(m[1], c, a, lifespanDef=self.sT)]})
+                        self.stars.update({m[1]:[LowStars(m[1], c, a, 0,lifespanDef=self.sT)]})
                 else:
                     try:
-                        self.stars[m[1]].append(HighStars(m[1], c, a, lifespanDef=self.sT))
+                        p = len(self.stars[m[1]])-1
+                        self.stars[m[1]].append(HighStars(m[1], c, a, p, lifespanDef=self.sT))
                     except:
-                        self.stars.update({m[1]:[HighStars(m[1], c, a, lifespanDef=self.sT)]})
+                        self.stars.update({m[1]:[HighStars(m[1], c, a, 0, lifespanDef=self.sT)]})
                 self.totalMassStarBorn += m[1]*c
         self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSMDG(), 3)
         pass
@@ -992,15 +1060,16 @@ class SimpleModelUnit(object):
                 
                 #Generate the minor stars
                 if y < 8:
-                    m = LowStars(y, c, yComp, lifespanDef=self.sT)
+                    m = LowStars(y, c, yComp, 0, lifespanDef=self.sT)
                 else:
-                    m = HighStars(y, c, yComp, lifespanDef=self.sT)
+                    m = HighStars(y, c, yComp, 0, lifespanDef=self.sT)
                 
                 #Generate the Major Stars
+                p = len(self.stars[x])-1
                 if x < 8:
-                    M = LowStars(x, c, xComp, sisters=[m], lifespanDef=self.sT)
+                    M = LowStars(x, c, xComp, p, sisters=[m], lifespanDef=self.sT)
                 else:
-                    M = HighStars(x, c, xComp, sisters=[m], lifespanDef=self.sT)
+                    M = HighStars(x, c, xComp, p, sisters=[m], lifespanDef=self.sT)
                     
                 #Store the result in the stars list
                 try:
@@ -1011,6 +1080,27 @@ class SimpleModelUnit(object):
                 self.bStellarGen(bBS[:-1], SML[:-1])
                 break
         pass
+
+    def starsYield(self, g, v):
+        """
+        Calculate the stellar yield of a list of stars
+        v, a list of stars
+        g, the indices in which the stars are located
+        """
+        for s in v:
+                a, r = s.update()
+                if a != None:
+                    self.composition += a
+                if r != None:
+                    self.stars[g].pop(v.index(s))
+                    try:
+                        r.setPos(len(self.stars["Renmant"])-1)
+                        self.stars["Renmant"].append(r)
+                    except:
+                        r.setPos(0)
+                        self.stars.update({"Renmant":[r]})
+                self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSMDG(), 3)
+        
 
     def update(self):
         """
@@ -1023,17 +1113,7 @@ class SimpleModelUnit(object):
         self.age += 1
         
         for g, v in list(self.stars.items()):
-            for s in v:
-                a, r = s.update()
-                if a != None:
-                    self.composition += a
-                if r != None:
-                    self.stars[g].pop(v.index(s))
-                    try:
-                        self.stars["Renmant"].append(r)
-                    except:
-                        self.stars.update({"Renmant":[r]})
-                self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSMDG(), 3)
+            self.starsYield(g, v)
             
         #Generate the Stars
         self.stellarGen()
@@ -1042,8 +1122,9 @@ class SimpleModelUnit(object):
     
     def Run(self, times):
         for t in range(times):
+            start = time()
             self.update()
-            print(str(round(t/times*100, 2)) + "%")
+            print(str(round(t/times*100, 2)) + "% - " + str(round(time()-start, 3)) + "s")
         self.printStars(full=True)
         print()
         pass
@@ -1051,4 +1132,4 @@ class SimpleModelUnit(object):
 a = Composition()
 a.aMS("H", 100000000000*cUnit)
 fi = SimpleModelUnit(a, surface = 75398, SFR=0.1)
-fi.Run(130)
+fi.Run(5)
