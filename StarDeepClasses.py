@@ -81,7 +81,7 @@ class Element():
     def __str__(self):
         return " ".join([self.keys[0], self.keys[1], self.keys[2]])
     
-    def getAM(self):
+    def getAtomicMass(self):
         '''
         Get Atomic Mass
         '''
@@ -125,7 +125,7 @@ class Composition():
             self.elements.update({b : 0})
         
         if elements != None:
-            self.aM(elements)
+            self.addMass(elements)
         
         self.rAV = 999
         pass
@@ -146,7 +146,7 @@ class Composition():
     #     self.rAV -= 1
     #     return name
 
-    def aMS(self, elem, mass):
+    def addSingleMass(self, elem, mass):
         """
         addMassSingle:
         elem, an atribuite defining the element to add (or subtract) mass on, could be:
@@ -160,14 +160,14 @@ class Composition():
         if the elements is not present, and defined with an element class, it will add as a new one in the dictionary
         """
         # elem = self.nI(elem)
-        elem = self.gEl(elem)
+        elem = self.getElKey(elem)
         try:
             if elem in self.elements.keys() and self.elements[elem] + mass >= 0:
                 self.elements.update({elem : round(self.elements[elem] + mass, cDP)})
             elif elem in self.elements.keys():
                 raise ArithmeticError("element ", elem, " has gone below zero mass, has been setted to zero")
             else:
-                raise KeyError("Periodic Table aMS() failed to find the element ", elem)
+                raise KeyError("Periodic Table addSingleMass() failed to find the element ", elem)
         except KeyError:
             if mass > 0 and type(elem)==Element:
                 self.elements.update({elem:mass})
@@ -181,7 +181,7 @@ class Composition():
             pass
         pass
     
-    def aM(self, elems, masses = None):
+    def addMass(self, elems, masses = None):
         """
         AddMasses:
         cases
@@ -194,11 +194,11 @@ class Composition():
         """
         if type(elems)==list and masses!=None and len(masses)==len(elems):
             for e in elems:
-                e = self.gEl(e)
+                e = self.getElKey(e)
                 try:
-                    self.aMS(e, masses[elems.index(e)])
+                    self.addSingleMass(e, masses[elems.index(e)])
                 except KeyError:
-                    print("Periodic Table AMS() failed to find the element ", e)
+                    print("Periodic Table addSingleMass() failed to find the element ", e)
                     # if masses[elems.index(e)] > 0:
                     #     self.elements.update({e:masses[elems.index(e)]})
                     #     self.metalEl.append(True)
@@ -209,21 +209,21 @@ class Composition():
 
         elif type(elems)==dict:
             for k,v in elems.items():
-                k = self.gEl(k)
+                k = self.getElKey(k)
                 try:
-                    self.aMS(k, v)
+                    self.addSingleMass(k, v)
                 except KeyError:
                     pass
 
         elif type(elems)==Composition:
             for e,v in elems.elements.items():
                 try:
-                    self.aMS(e, v)
+                    self.addSingleMass(e, v)
                 except KeyError:
                     pass
         pass
     
-    def sMS(self, elem, mass):
+    def setSingleMass(self, elem, mass):
         """
         SetMassSingle:
         elem, an atribuite defining the element to set mass on, could be:
@@ -236,7 +236,7 @@ class Composition():
         
         if the elements is not present, and defined with an element class, it will add as a new one in the dictionary
         """
-        elem = self.gEl(elem)
+        elem = self.getElKey(elem)
         try:
             if elem in self.elements.keys() and mass >= 0:
                 self.elements.update({elem : round(mass, cDP)})
@@ -246,7 +246,7 @@ class Composition():
             else:
                 raise KeyError
         except KeyError:
-            print("Periodic Table aMS() failed to find the element ", elem)
+            print("Periodic Table addSingleMass() failed to find the element ", elem)
             if mass > 0 and type(elem)==Element:
                 self.elements.update({elem:mass})
                 print("it has been added as new Element")
@@ -259,7 +259,7 @@ class Composition():
             pass
     pass
 
-    def sM(self, elems, masses = None):
+    def setMass(self, elems, masses = None):
         """
         SetMass:
         cases
@@ -269,11 +269,11 @@ class Composition():
         """
         if type(elems)==list and masses!=None and len(masses)==len(elems):
             for e in elems:
-                e = self.gEl(e)
+                e = self.getElKey(e)
                 try:
-                    self.sMS(e, masses[elems.index(e)])
+                    self.setSingleMass(e, masses[elems.index(e)])
                 except KeyError:
-                    print("Periodic Table AMS() failed to find the element ", e)
+                    print("Periodic Table addSingleMass() failed to find the element ", e)
                     # if masses[elems.index(e)] > 0:
                     #     self.elements.update({e:masses[elems.index(e)]})
                     #     print("it has been added as new key")
@@ -282,25 +282,25 @@ class Composition():
         
         elif type(elems)==dict:
             for k,v in elems.items():
-                k = self.gEl(k)
+                k = self.getElKey(k)
                 try:
-                    self.sMS(k, v)
+                    self.setSingleMass(k, v)
                 except KeyError:
                     pass
 
         elif type(elems)==Composition:
             for e,v in elems.elements.items():
                 try:
-                    self.sMS(e, v)
+                    self.setSingleMass(e, v)
                 except KeyError:
                     pass
         pass
     
-    def gM(self, elem):
+    def getMass(self, elem):
         """
         Get the mass of a single element
         """
-        elem = self.gEl(elem)
+        elem = self.getElKey(elem)
         for e in self.elements.keys():
             if elem == e:
                 return self.elements[e]
@@ -330,9 +330,9 @@ class Composition():
         mergeElements:
         define an element 1 (key 1), to collect the mass of a element 2 (key2), the last will be removed
         '''
-        key1 = self.gEl(key1)
-        key2 = self.gEl(key2)
-        self.aMS(key1, self.gM(key2))
+        key1 = self.getElKey(key1)
+        key2 = self.getElKey(key2)
+        self.addSingleMass(key1, self.getMass(key2))
         self.elements.pop(key2)
         pass
         
@@ -342,24 +342,24 @@ class Composition():
         the key 1 will be splittet by a weight between 0 and 1 in a key2 depositorary, 
         """
         assert weight <= 1, "weight must fall between 0 and 1"
-        key1 = self.gEl(key1)
-        key2 = self.gEl(key2)
-        self.aMS(key2, self.gM(key1)*(weight))
-        self.aMS(key1, -self.gM(key1)*(weight))
+        key1 = self.getElKey(key1)
+        key2 = self.getElKey(key2)
+        self.addSingleMass(key2, self.getMass(key1)*(weight))
+        self.addSingleMass(key1, -self.getMass(key1)*(weight))
         pass
     
-    def con(self, key1, key2, mass):
+    def convert(self, key1, key2, mass):
         """
         convert a certain amount of a key to another
         """
-        key1 = self.gEl(key1)
-        key2 = self.gEl(key2)
-        self.aMS(key2, mass)
-        self.aMS(key1, -mass)
+        key1 = self.getElKey(key1)
+        key2 = self.getElKey(key2)
+        self.addSingleMass(key2, mass)
+        self.addSingleMass(key1, -mass)
         pass
         
     
-    def gEl(self, key):
+    def getElKey(self, key):
         '''
         Normalize the input
         '''
@@ -374,7 +374,7 @@ class Composition():
         """
         Return true if the element is in the composition
         """
-        elem = self.gEl(elem)
+        elem = self.getElKey(elem)
         for k in self.elements.keys():
             return True
         return False
@@ -383,7 +383,7 @@ class Composition():
         """
         Read the element key, set sull to True for show all data about the key
         """
-        elem = self.gEl(elem)
+        elem = self.getElKey(elem)
         for k in self.elements.keys():
             if elem == k:
                 if full:
@@ -391,7 +391,7 @@ class Composition():
                 return k
         raise KeyError("element not present")
 
-    def ex(self, elem, q):
+    def extract(self, elem, q):
         """
         extract:
         elem, the key element to extract from the , can be an array
@@ -403,19 +403,19 @@ class Composition():
         if type(elem) == list and type(q) == list and len(elem)==len(q):
             nC = Composition()
             for e, qa in zip(elem, q):
-                e = self.gEl(e)
-                self.elements.aMS(elem, -qa)
-                nC.aMS(elem, q)
+                e = self.getElKey(e)
+                self.elements.addSingleMass(elem, -qa)
+                nC.addSingleMass(elem, q)
             return nC
         elif type(elem) == list:
             raise KeyError("element list and quantity list must be of the same size")
-        elem = self.gEl(elem)
+        elem = self.getElKey(elem)
         for k in self.elements.keys():
             if elem == k:
-                self.aMS(elem, -q)
-                return a.aMS(elem, q)
+                self.addSingleMass(elem, -q)
+                return a.addSingleMass(elem, q)
     
-    def gEx(self, mass):
+    def genericEx(self, mass):
         """
         Generic extract an  amount of mass picking a percentile of all elements
         """
@@ -425,8 +425,8 @@ class Composition():
         try:
             for k, v in self.elements.items():
                 nv = round((v/a)*mass, cDP)
-                self.aMS(k, -nv)
-                exCom.aMS(k, nv)
+                self.addSingleMass(k, -nv)
+                exCom.addSingleMass(k, nv)
         except ZeroDivisionError:
             return exCom
         return exCom
@@ -451,7 +451,7 @@ class Composition():
                 nMM += v
         return nMM
     
-    def mMF(self):
+    def metalMassFract(self):
         """
         Return the metal mass fraction of the composition
         """
@@ -488,12 +488,12 @@ class Composition():
         
     def __add__(self, other):
         for k, v in other.elements.items():
-            self.aMS(k, v)
+            self.addSingleMass(k, v)
         return Composition(self.elements)
             
     def __sub__(self, other):
         for k, v in other.elements.items():
-            self.aMS(k, -v)
+            self.addSingleMass(k, -v)
         return Composition(self.elements)
     
     def __eq__(self, other):
@@ -528,12 +528,12 @@ class Stars():
         self.number = number
         self.composition = composition
         self.lifespanDef = lifespanDef
-        self.lifespan = self.iniLS()
+        self.lifespan = self.iniLifeSpan()
         self.pos = Position
         self.ID = self.genID()
         pass
     
-    def iniLS(self):
+    def iniLifeSpan(self):
         """
         get the stellar lifespam (stellar time), based on the mass
         """
@@ -680,27 +680,27 @@ class LowStars(Stars):
         Return a tuple of the product of the star yield and the renmant
         star
         """
-        sYield = getStarYield(self.composition.mMF(), self.getMass())
+        sYield = getStarYield(self.composition.metalMassFract(), self.getMass())
         renmant = sYield.pop("rem")
-        self.composition.gEx(renmant*self.getNum()*cUnit)
+        self.composition.genericEx(renmant*self.getNum()*cUnit)
         for k, v in sYield.items():
             if v < 0:
                 try:
-                    self.composition.ex(k, -v)
+                    self.composition.extract(k, -v)
                     continue
                 except ArithmeticError:
-                    self.composition.sMS(k, 0)
+                    self.composition.setSingleMass(k, 0)
                     continue
-            self.composition.con("h", k, v*cUnit*self.getNum())
+            self.composition.convert("h", k, v*cUnit*self.getNum())
         product = self.composition
         self.composition = Composition()
         renmantComp = Composition()
         #it should never spawn a bHoles or a neutron star, but i leave this here for safety
         if renmant > 2.4:
-            return product, BHoles(renmant, self.getNum(), renmantComp.aMS("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+            return product, BHoles(renmant, self.getNum(), renmantComp.addSingleMass("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
         elif renmant > 1.44:
-            return product, NeutronStars(renmant, self.getNum(), renmantComp.aMS("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
-        return product, WDStars(renmant, self.getNum(), renmantComp.aMS("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+            return product, NeutronStars(renmant, self.getNum(), renmantComp.addSingleMass("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        return product, WDStars(renmant, self.getNum(), renmantComp.addSingleMass("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
     
 class HighStars(Stars):
     """
@@ -713,26 +713,26 @@ class HighStars(Stars):
         Return a tuple of the product of the star yield and the renmant
         star
         """
-        sYield = getStarYield(self.composition.mMF(), self.getMass())
+        sYield = getStarYield(self.composition.metalMassFract(), self.getMass())
         renmant = sYield.pop("rem")
-        self.composition.gEx(renmant*self.getNum()*cUnit)
+        self.composition.genericEx(renmant*self.getNum()*cUnit)
         for k, v in sYield.items():
             if v < 0:
                 try:
-                    self.composition.ex(k, -v)
+                    self.composition.extract(k, -v)
                     continue
                 except ArithmeticError:
-                    self.composition.sMS(k, 0)
+                    self.composition.setSingleMass(k, 0)
                     continue
-            self.composition.con("h", k, v*cUnit*self.getNum())
+            self.composition.convert("h", k, v*cUnit*self.getNum())
         product = self.composition
         self.composition = Composition()
         renmantComp = Composition()
         if renmant > 2.4:
-            return product, BHoles(renmant, self.getNum(), renmantComp.aMS("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+            return product, BHoles(renmant, self.getNum(), renmantComp.addSingleMass("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
         elif renmant > 1.44:
-            return product, NeutronStars(renmant, self.getNum(), renmantComp.aMS("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
-        return product, WDStars(renmant, self.getNum(), renmantComp.aMS("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+            return product, NeutronStars(renmant, self.getNum(), renmantComp.addSingleMass("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        return product, WDStars(renmant, self.getNum(), renmantComp.addSingleMass("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
     
 class Renmants(Stars):
     """
@@ -823,7 +823,7 @@ class SimpleModelUnit(object):
         self.SFR = SFR
         """gsm, generated star masses, normalize the SFR in the current situation.
         moltiplied by the current surface density of gas of the simple model"""
-        self.gsm = round((SFR*(surface*(yearPERTICK/1000000000)))*self.getSMDG(), 3)
+        self.gsm = round((SFR*(surface*(yearPERTICK/1000000000)))*self.getSurfaceMassDensity(), 3)
         
         """The percentage of stars born in a binary system"""
         self.bP = bP
@@ -874,7 +874,7 @@ class SimpleModelUnit(object):
         """
         return self.surface
     
-    def getTMSB(self):
+    def getTotalStarMassBorn(self):
         """
         return the current total mass of all born star
         """
@@ -964,7 +964,7 @@ class SimpleModelUnit(object):
             if SM > 1:
                 return 1.7
     
-    def getSMDG(self):
+    def getSurfaceMassDensity(self):
         """
         surface mass density of gas (solar masses)
         """
@@ -988,7 +988,7 @@ class SimpleModelUnit(object):
                     (80.00, 90.00, 100.00), (100.00, 110.00, 120.00)] #debug test
         pass
     
-    def getIM(self):
+    def getInitialMass(self):
         """
         get initial masses:
         it will return a list with the number of star in each mass category
@@ -1007,7 +1007,7 @@ class SimpleModelUnit(object):
         """
         Generate the single Stars. Should always be called before the binary generation
         """
-        for s, m in zip(self.getIM(), self.getSML(self.SMLmethod)):
+        for s, m in zip(self.getInitialMass(), self.getSML(self.SMLmethod)):
             if s/m[1] >= 1:
                 c = int(s//m[1])
                 si = self.bS.index(s)
@@ -1015,11 +1015,11 @@ class SimpleModelUnit(object):
                 self.bBS[si] = int(c*self.bP)
                 c = c - int(c*self.bP)
                 try:
-                    a = self.composition.gEx(round(c*m[1]*cUnit, cDP))
+                    a = self.composition.genericEx(round(c*m[1]*cUnit, cDP))
                 except AssertionError:
                     c *= self.composition.totalMass()/(c*m[1]*cUnit)
                     c = int(c//1)
-                    a = self.composition.gEx(round(c*m[1]*cUnit, cDP))
+                    a = self.composition.genericEx(round(c*m[1]*cUnit, cDP))
                 if m[1] < 8:
                     try:
                         p = len(self.stars[m[1]])-1
@@ -1033,7 +1033,7 @@ class SimpleModelUnit(object):
                     except:
                         self.stars.update({m[1]:[HighStars(m[1], c, a, 0, lifespanDef=self.sT)]})
                 self.totalMassStarBorn += m[1]*c
-        self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSMDG(), 3)
+        self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSurfaceMassDensity(), 3)
         pass
 
     def bStellarGen(self, bBS, SML):
@@ -1055,8 +1055,8 @@ class SimpleModelUnit(object):
                     continue
                 bBS[a] -= c
                 bBS[-1] -= c
-                xComp = self.composition.gEx(round(c*x*cUnit, cDP))
-                yComp = self.composition.gEx(round(c*y*cUnit, cDP))
+                xComp = self.composition.genericEx(round(c*x*cUnit, cDP))
+                yComp = self.composition.genericEx(round(c*y*cUnit, cDP))
                 
                 #Generate the minor stars
                 if y < 8:
@@ -1099,7 +1099,7 @@ class SimpleModelUnit(object):
                     except:
                         r.setPos(0)
                         self.stars.update({"Renmant":[r]})
-                self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSMDG(), 3)
+                self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSurfaceMassDensity(), 3)
         
 
     def update(self):
@@ -1130,6 +1130,6 @@ class SimpleModelUnit(object):
         pass
 
 a = Composition()
-a.aMS("H", 100000000000*cUnit)
+a.addSingleMass("H", 100000000000*cUnit)
 fi = SimpleModelUnit(a, surface = 75398, SFR=0.1)
 fi.Run(5)
