@@ -1,2 +1,2 @@
 # StarDeep
- Simulation for galaxies chemical evolution
+ Simulation of galaxies chemical evolution
