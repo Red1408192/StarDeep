@@ -118,10 +118,10 @@ class Composition():
     def __init__(self, elements = None): #never set as a default atribuite a list or a dictionary, they will have the same location between all the class instances
         self.index = 0
         self.elements = {}
-        for i in range(len(elIso)): #Collect the data from the elIso global variable
-            b = Element(elIso[i][0], elIso[i][1], elIso[i][2],
-                        elIso[i][3], elIso[i][4], elIso[i][5],
-                        elIso[i][6], elIso[i][7], elIso[i][8])
+        
+        for idx, row in elem_iso.iterrows():
+            b = Element(row['name'], row['atomic_symbol'], row['atomic_number'],
+                        aM=row['atomic_mass'], me=row['is_metallic'])
             self.elements.update({b : 0})
         
         if elements != None:

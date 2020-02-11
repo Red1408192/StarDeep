@@ -1,4 +1,4 @@
-English element name	atomic symbol	atomic #	German element name	French element name	Spanish element name	Italian element name	atomic mass (NIST 2016)	Metallic (astrophisics)
+english	atomic_symbol	atomic_number	german	french	spanish	italian	atomic_mass	is_metallic
 hydrogen	H	1	Wasserstoff	hydrogène	hidrógeno	idrogeno	1,0078250321	False
 Deuterium	H_2	1_2	Deuterium	deutérium	deuterio	deuterio	2,0141017780	False
 helium	He	2	Helium	hélium	helio	elio	4,0026032497	False
