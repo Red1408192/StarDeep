@@ -13,7 +13,7 @@ from random import random
 from random import choice
 # import numpy as np
 TIMETICK = 1 # the tick per update call
-yearPERTICK = 1000000 #the year per tick in the calculation, 1m is the default
+yearPERTICK = 100000000 #the year per tick in the calculation, 1m is the default
 cUnit = 1000000000 #the scale of 1 solar mass in the composition, default is 1b
 cDP = 0 #the number of decimal places in the composition, default is 0
 
@@ -603,7 +603,7 @@ class Stars():
         """
         Update the star lifespan
         return None if the star or her's sisters didn't die
-        return a tuple of (yield, renmant) if the star died
+        return a tuple of (yield, remnant) if the star died
         return a tuple of (yield, None) if just a sister died
         """
         empty = Composition()
@@ -611,7 +611,7 @@ class Stars():
         res2 = Composition()
         for s in self.sisters:
             yie = s.update()
-            if yie != None:
+            if yie != (None,None):
                 res += yie[0]
                 if yie[1] != None:
                     self.sisters[self.sisters.index(s)] = yie[1]
@@ -678,17 +678,17 @@ class Stars():
 class LowStars(Stars):
     """
     Stars of mass between 0.08 and 8 solar masses,
-    leave behid a whitedwarf as renmant
+    leave behid a whitedwarf as remnant
     """
     
     def endStars(self):
         """
-        Return a tuple of the product of the star yield and the renmant
+        Return a tuple of the product of the star yield and the remnant
         star
         """
         sYield = getStarYield(self.composition.metalMassFract(), self.getMass())
-        renmant = sYield.pop("rem")
-        self.composition.genericEx(renmant*self.getNum()*cUnit)
+        remnant = sYield.pop("rem")
+        self.composition.genericEx(remnant*self.getNum()*cUnit)
         for k, v in sYield.items():
             if v < 0:
                 try:
@@ -700,28 +700,28 @@ class LowStars(Stars):
             self.composition.convert("h", k, v*cUnit*self.getNum())
         product = self.composition
         self.composition = Composition()
-        renmantComp = Composition()
+        remnantComp = Composition()
         #it should never spawn a bHoles or a neutron star, but i leave this here for safety
-        if renmant > 2.4:
-            return product, BHoles(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
-        elif renmant > 1.44:
-            return product, NeutronStars(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
-        return product, WDStars(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        if remnant > 2.4:
+            return product, BHoles(self.nest_instance, remnant, self.getNum(), remnantComp.addSingleMass("bm", remnant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        elif remnant > 1.44:
+            return product, NeutronStars(self.nest_instance, remnant, self.getNum(), remnantComp.addSingleMass("gm", remnant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        return product, WDStars(self.nest_instance, remnant, self.getNum(), remnantComp.addSingleMass("wm", remnant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
     
 class HighStars(Stars):
     """
     Stars of mass over the 8 solar masses,
-    leave behid a neutron stars and black hole as renmant,
+    leave behid a neutron stars and black hole as remnant,
     the mainb difference is that they cause supernoave event
     """    
     def endStars(self):
         """
-        Return a tuple of the product of the star yield and the renmant
+        Return a tuple of the product of the star yield and the remnant
         star
         """
         sYield = getStarYield(self.composition.metalMassFract(), self.getMass())
-        renmant = sYield.pop("rem")
-        self.composition.genericEx(renmant*self.getNum()*cUnit)
+        remnant = sYield.pop("rem")
+        self.composition.genericEx(remnant*self.getNum()*cUnit)
         for k, v in sYield.items():
             if v < 0:
                 try:
@@ -733,16 +733,16 @@ class HighStars(Stars):
             self.composition.convert("h", k, v*cUnit*self.getNum())
         product = self.composition
         self.composition = Composition()
-        renmantComp = Composition()
-        if renmant > 2.4:
-            return product, BHoles(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
-        elif renmant > 1.44:
-            return product, NeutronStars(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
-        return product, WDStars(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        remnantComp = Composition()
+        if remnant > 2.4:
+            return product, BHoles(self.nest_instance, remnant, self.getNum(), remnantComp.addSingleMass("bm", remnant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        elif remnant > 1.44:
+            return product, NeutronStars(self.nest_instance, remnant, self.getNum(), remnantComp.addSingleMass("gm", remnant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        return product, WDStars(self.nest_instance, remnant, self.getNum(), remnantComp.addSingleMass("wm", remnant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
     
-class Renmants(Stars):
+class Remnants(Stars):
     """
-    Abstract class for inerte renmant Stars
+    Abstract class for inerte remnant Stars
     in the update def there will
     be no reducing lifespan
     """
@@ -756,11 +756,12 @@ class Renmants(Stars):
         res = Composition()
         for s in self.sisters:
             yie = s.update()
-            if yie != None:
+            if yie != (None,None):
+                print(self.getID())
                 res += yie[0]
                 if yie[1] != None and yie[1].getID()[0] == "4" and self.getID()[0] == "4":
                     pos = int(self.getID()[3:])
-                    this = self.nest_instance.stars["Renmant"].pop(pos)
+                    this = self.nest_instance.stars["Remnant"].pop(pos)
                     self.sisters[self.sisters.index(s)] = yie[1]
                     print("found")
                     try:
@@ -773,12 +774,12 @@ class Renmants(Stars):
             return res, None
         return None, None
     
-class WDStars(Renmants):
+class WDStars(Remnants):
     """
     White Dwarf Stars
     """
 
-class NeutronStars(Renmants):
+class NeutronStars(Remnants):
     """
     Neutron Stars
     """    
@@ -788,7 +789,7 @@ class NeutronStars(Renmants):
         """
         pass
 
-class BHoles(Renmants):
+class BHoles(Remnants):
     """
     Black Holes
     """
@@ -902,7 +903,7 @@ class SimpleModelUnit(object):
         """
         return a dictionari withe the number of stars for each category,
         by mass if still alive,
-        by the kind of renmant if dead
+        by the kind of remnant if dead
         """
         def insertCount(s):
             if s.getID()[0] == "3":
@@ -1109,14 +1110,22 @@ class SimpleModelUnit(object):
                 a, r = s.update()
                 if a != None:
                     self.composition += a
-                if r != None:
+                if r != None and (r.getID()[1] != 1 or r.getID()[1] != 2):
                     self.stars[g].pop(v.index(s))
                     try:
-                        r.setPos(len(self.stars["Renmant"])-1)
-                        self.stars["Renmant"].append(r)
+                        r.setPos(len(self.stars["DoubleRemnant"])-1)
+                        self.stars["DoubleRemnant"].append(r)
                     except:
                         r.setPos(0)
-                        self.stars.update({"Renmant":[r]})
+                        self.stars.update({"DoubleRemnant":[r]})
+                elif r != None:
+                    self.stars[g].pop(v.index(s))
+                    try:
+                        r.setPos(len(self.stars["Remnant"])-1)
+                        self.stars["Remnant"].append(r)
+                    except:
+                        r.setPos(0)
+                        self.stars.update({"Remnant":[r]})
                 self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSurfaceMassDensity(), 3)
         
 
@@ -1124,13 +1133,15 @@ class SimpleModelUnit(object):
         """
         Update the current simple unit composition
         firstly, elaborate the yield of the current star population, both
-        composition and stellar renmant creation
+        composition and stellar remnant creation
         secondly, calculate the stars born in this unitTime
         do not return anithing
         """
         self.age += 1
         
         for g, v in list(self.stars.items()):
+            if g == "DoubleRemnant":
+                continue
             self.starsYield(g, v)
             
         #Generate the Stars
