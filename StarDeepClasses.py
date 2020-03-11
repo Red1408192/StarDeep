@@ -13,7 +13,7 @@ from random import random
 from random import choice
 # import numpy as np
 TIMETICK = 1 # the tick per update call
-yearPERTICK = 100000000 #the year per tick in the calculation, 1m is the default
+yearPERTICK = 1000000 #the year per tick in the calculation, 1m is the default
 cUnit = 1000000000 #the scale of 1 solar mass in the composition, default is 1b
 cDP = 0 #the number of decimal places in the composition, default is 0
 
@@ -519,7 +519,9 @@ class Stars():
     lifespanDef, a string defining the equation for the calculate the star lifespan
         chose from "Default", "simple", "SimpleClassic"
     """
-    def __init__(self, mass, number, composition, Position, sisters = None, lifespanDef="Default"):
+    def __init__(self, nest, mass, number, composition, Position, sisters = None, lifespanDef="Default"):
+        
+        self.nest_instance = nest
         if sisters == None or len(sisters) == 0:
             self.sisters = []
         else:
@@ -531,6 +533,10 @@ class Stars():
         self.lifespan = self.iniLifeSpan()
         self.pos = Position
         self.ID = self.genID()
+        pass
+    
+    def changeNest(self, outer):
+        self.nest_instance = outer
         pass
     
     def iniLifeSpan(self):
@@ -697,10 +703,10 @@ class LowStars(Stars):
         renmantComp = Composition()
         #it should never spawn a bHoles or a neutron star, but i leave this here for safety
         if renmant > 2.4:
-            return product, BHoles(renmant, self.getNum(), renmantComp.addSingleMass("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+            return product, BHoles(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
         elif renmant > 1.44:
-            return product, NeutronStars(renmant, self.getNum(), renmantComp.addSingleMass("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
-        return product, WDStars(renmant, self.getNum(), renmantComp.addSingleMass("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+            return product, NeutronStars(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        return product, WDStars(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
     
 class HighStars(Stars):
     """
@@ -729,10 +735,10 @@ class HighStars(Stars):
         self.composition = Composition()
         renmantComp = Composition()
         if renmant > 2.4:
-            return product, BHoles(renmant, self.getNum(), renmantComp.addSingleMass("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+            return product, BHoles(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("bm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
         elif renmant > 1.44:
-            return product, NeutronStars(renmant, self.getNum(), renmantComp.addSingleMass("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
-        return product, WDStars(renmant, self.getNum(), renmantComp.addSingleMass("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+            return product, NeutronStars(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("gm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
+        return product, WDStars(self.nest_instance, renmant, self.getNum(), renmantComp.addSingleMass("wm", renmant*self.getNum()*cUnit), self.pos, self.sisters, self.lifespanDef)
     
 class Renmants(Stars):
     """
@@ -752,7 +758,16 @@ class Renmants(Stars):
             yie = s.update()
             if yie != None:
                 res += yie[0]
-                if yie[1] != None:
+                if yie[1] != None and yie[1].getID()[0] == "4" and self.getID()[0] == "4":
+                    pos = int(self.getID()[3:])
+                    this = self.nest_instance.stars["Renmant"].pop(pos)
+                    self.sisters[self.sisters.index(s)] = yie[1]
+                    print("found")
+                    try:
+                        self.nest_instance.stars["NSMCandidate"].append(this)
+                    except:
+                        self.nest_instance.stars.update({"NSMCandidate":[this]})    
+                elif yie[1] != None:
                     self.sisters[self.sisters.index(s)] = yie[1]
         if res != empty:
             return res, None
@@ -815,6 +830,9 @@ class SimpleModelUnit(object):
         self.stars = {}
         if stars != None:
             self.stars = stars
+            for g in self.stars:
+                for s in g:
+                    s.changeNest(self)
         self.totalMassStarBorn = 0
         if stars != None:
             for s in stars:
@@ -1023,15 +1041,15 @@ class SimpleModelUnit(object):
                 if m[1] < 8:
                     try:
                         p = len(self.stars[m[1]])-1
-                        self.stars[m[1]].append(LowStars(m[1], c, a, p, lifespanDef=self.sT))
+                        self.stars[m[1]].append(LowStars(self, m[1], c, a, p, lifespanDef=self.sT))
                     except:
-                        self.stars.update({m[1]:[LowStars(m[1], c, a, 0,lifespanDef=self.sT)]})
+                        self.stars.update({m[1]:[LowStars(self, m[1], c, a, 0,lifespanDef=self.sT)]})
                 else:
                     try:
                         p = len(self.stars[m[1]])-1
-                        self.stars[m[1]].append(HighStars(m[1], c, a, p, lifespanDef=self.sT))
+                        self.stars[m[1]].append(HighStars(self, m[1], c, a, p, lifespanDef=self.sT))
                     except:
-                        self.stars.update({m[1]:[HighStars(m[1], c, a, 0, lifespanDef=self.sT)]})
+                        self.stars.update({m[1]:[HighStars(self, m[1], c, a, 0, lifespanDef=self.sT)]})
                 self.totalMassStarBorn += m[1]*c
         self.gsm = round((self.SFR*(self.surface*(yearPERTICK/1000000000)))*self.getSurfaceMassDensity(), 3)
         pass
@@ -1060,16 +1078,16 @@ class SimpleModelUnit(object):
                 
                 #Generate the minor stars
                 if y < 8:
-                    m = LowStars(y, c, yComp, 0, lifespanDef=self.sT)
+                    m = LowStars(self, y, c, yComp, 0, lifespanDef=self.sT)
                 else:
-                    m = HighStars(y, c, yComp, 0, lifespanDef=self.sT)
+                    m = HighStars(self, y, c, yComp, 0, lifespanDef=self.sT)
                 
                 #Generate the Major Stars
                 p = len(self.stars[x])-1
                 if x < 8:
-                    M = LowStars(x, c, xComp, p, sisters=[m], lifespanDef=self.sT)
+                    M = LowStars(self, x, c, xComp, p, sisters=[m], lifespanDef=self.sT)
                 else:
-                    M = HighStars(x, c, xComp, p, sisters=[m], lifespanDef=self.sT)
+                    M = HighStars(self, x, c, xComp, p, sisters=[m], lifespanDef=self.sT)
                     
                 #Store the result in the stars list
                 try:
@@ -1132,4 +1150,4 @@ class SimpleModelUnit(object):
 a = Composition()
 a.addSingleMass("H", 100000000000*cUnit)
 fi = SimpleModelUnit(a, surface = 75398, SFR=0.1)
-fi.Run(5)
+fi.Run(120)
